@@ -33,7 +33,7 @@ The expected data format closely ressembles the one in the [deck.gl example fold
   "color":[0,179,0],
   "segments":[
     [-73.53498,45.59714,19800.0],
-    [-73.53541,45.59641,19808.3]
+    [-73.53541,45.59641,19808.3],
     ["..."]
   ]
 }

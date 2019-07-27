@@ -25,5 +25,8 @@
   },
   "dataPath": "./path/to/file.json",
   "mapboxToken": "YOUR_TOKEN_HERE",
-  "mapboxStyle": "mapbox://styles/mapbox/dark-v9"
+  "mapboxStyle": "mapbox://styles/mapbox/dark-v9",
+  "startTime": 15600,
+  "endTime": 93600,
+  "trailLength": 70
 }
