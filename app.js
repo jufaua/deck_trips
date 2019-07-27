@@ -7,43 +7,24 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
+import config from './config.json';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-// Source data CSV
-const DATA_URL = {
-  TRIPS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
-};
+const ambientLight = new AmbientLight(config.lighting.ambientLight || {color: [255, 255, 255], intensity: 1.0} );
 
-const ambientLight = new AmbientLight({
-  color: [255, 255, 255],
-  intensity: 1.0
-});
-
-const pointLight = new PointLight({
-  color: [255, 255, 255],
-  intensity: 2.0,
-  position: [-74.05, 40.7, 8000]
-});
+const pointLight = new PointLight(config.lighting.pointLight || {color: [255, 255, 255],intensity: 2.0,position: [-74.05, 40.7, 8000]} );
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight});
 
-const material = new PhongMaterial({
-  ambient: 0.1,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [60, 64, 70]
-});
+const material = new PhongMaterial(config.material || { ambient: 0.1, diffuse: 0.6, shininess: 32, specularColor: [60, 64, 70] });
 
-const INITIAL_VIEW_STATE = {
-  longitude: -74,
-  latitude: 40.72,
-  zoom: 13,
-  pitch: 45,
-  bearing: 0
-};
+const INITIAL_VIEW_STATE = config.mapConfig || {longitude: -73.6, latitude: 45.5, zoom: 10, pitch: 45, bearing: 0};
+
+const DATA_URL = {
+  TRIPS: config.dataPath
+}
 
 export class App extends Component {
   constructor(props) {
@@ -72,13 +53,13 @@ export class App extends Component {
     const loopTime = loopLength / animationSpeed;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (((timestamp % loopTime) / loopTime) * loopLength) + 25000
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
   _renderLayers() {
-    const {trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
+    const {trips = trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
 
     return [
       new TripsLayer({

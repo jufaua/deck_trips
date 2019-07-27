@@ -1,16 +1,22 @@
 {
-  "name": "trips",
-  "version": "0.0.0",
+  "name": "deck_trips",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.9.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "deck.gl": "^7.1.0",
+    "moment": "^2.24.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0"
+    "react-map-gl": "^5.0.0",
+    "react-moment": "^0.9.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
