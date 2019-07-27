@@ -9,6 +9,7 @@ import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import config from './config.json';
 import ControlPanel from './control-panel.js';
+import FPSStats from 'react-stats-zavatta';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = config.mapboxToken; // eslint-disable-line
@@ -142,6 +143,7 @@ export class App extends Component {
           _startAnimation={this._startAnimation}
           _updateTime={this._updateTime}
         />
+        <FPSStats isActive right='0' top='0' />
       </div>
     );
   }
