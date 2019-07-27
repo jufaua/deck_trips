@@ -8,9 +8,10 @@ import DeckGL from '@deck.gl/react';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import config from './config.json';
+import ControlPanel from './control-panel.js';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+const MAPBOX_TOKEN = config.mapboxToken; // eslint-disable-line
 
 const ambientLight = new AmbientLight(config.lighting.ambientLight || {color: [255, 255, 255], intensity: 1.0} );
 
@@ -30,12 +31,23 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      time: 0
+      buildings: null,
+      trips: null,
+      time: config.startTime,
+      animating: false,
+      animationSpeed: 2,
+      startTime: config.startTime,
+      endTime: config.endTime
     };
+
+    this._pauseAnimation = this._pauseAnimation.bind(this);
+    this._startAnimation = this._startAnimation.bind(this);
+    this._updateTime = this._updateTime.bind(this);
+
   }
 
   componentDidMount() {
-    this._animate();
+    this._startAnimation(this.state.animationSpeed);
   }
 
   componentWillUnmount() {
@@ -44,29 +56,56 @@ export class App extends Component {
     }
   }
 
-  _animate() {
-    const {
-      loopLength = 1800, // unit corresponds to the timestamp in source data
-      animationSpeed = 30 // unit time per second
-    } = this.props;
-    const timestamp = Date.now() / 1000;
-    const loopTime = loopLength / animationSpeed;
-
+  _pauseAnimation() {
     this.setState({
-      time: (((timestamp % loopTime) / loopTime) * loopLength) + 25000
+      animating: false,
+      animationSpeed: 0
     });
-    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
+    if (this._animationFrame) {
+      window.cancelAnimationFrame(this._animationFrame);
+    }
   }
 
+  _startAnimation(speed) {
+    if (this._animationFrame) {
+      window.cancelAnimationFrame(this._animationFrame);
+    }
+    if (this.state.time > config.endTime || this.state.time < config.startTime) {
+      this._pauseAnimation();
+      if (this.state.time < config.startTime) {
+        this.setState({ time: config.startTime });
+      } else {
+        this.setState({ time: config.endTime });
+      }
+    } else {
+      this.setState({
+        time: this.state.time + speed,
+        animating: true,
+        animationSpeed: speed
+      });
+      this._animationFrame = window.requestAnimationFrame(this._startAnimation.bind(this, speed));
+    }
+    //this._animate();
+  }
+
+  _updateTime(time) {
+    this._pauseAnimation();
+    this.setState({
+      time: time,
+      animating: false
+    });
+  }
+
+
   _renderLayers() {
-    const {trips = trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
+    const {trips = DATA_URL.TRIPS, trailLength = config.trailLength} = this.props;
 
     return [
       new TripsLayer({
         id: 'trips',
         data: trips,
         getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        getColor: d => d.color,
         opacity: 0.3,
         widthMinPixels: 2,
         rounded: true,
@@ -77,23 +116,33 @@ export class App extends Component {
   }
 
   render() {
-    const {viewState, mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
+    const {viewState, mapStyle = config.mapboxStyle } = this.props;
 
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        effects={[lightingEffect]}
-        initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        controller={true}
-      >
-        <StaticMap
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
+      <div>
+        <DeckGL
+          layers={this._renderLayers()}
+          effects={[lightingEffect]}
+          initialViewState={INITIAL_VIEW_STATE}
+          viewState={viewState}
+          controller={true}
+        >
+          <StaticMap
+            reuseMaps
+            mapStyle={mapStyle}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        </DeckGL>
+        <ControlPanel
+          containerComponent={this.props.containerComponent}
+          settings={this.state}
+          onChange={this._updateSettings}
+          _pauseAnimation={this._pauseAnimation}
+          _startAnimation={this._startAnimation}
+          _updateTime={this._updateTime}
         />
-      </DeckGL>
+      </div>
     );
   }
 }
